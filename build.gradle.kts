@@ -24,7 +24,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.springframework.kafka:spring-kafka")
-    //runtimeOnly("io.r2dbc:r2dbc-postgresql")
+    runtimeOnly("io.r2dbc:r2dbc-postgresql")
     runtimeOnly("org.postgresql:r2dbc-postgresql")
     runtimeOnly("io.r2dbc:r2dbc-pool")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
