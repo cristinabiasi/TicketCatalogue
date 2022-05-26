@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS ticketCatalogue;
+DROP TABLE IF EXISTS ticketCatalogue cascade;
 
 CREATE TABLE ticketCatalogue (
     id serial PRIMARY KEY,
