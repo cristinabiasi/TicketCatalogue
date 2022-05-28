@@ -1,10 +1,13 @@
 package it.group24.lab5.webapp2.ticketcatalogue
 
+import it.group24.lab5.webapp2.ticketcatalogue.routers.TicketRouter
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class TicketCatalogueApplication
+class TicketCatalogueApplication{
+
+}
 
 fun main(args: Array<String>) {
     runApplication<TicketCatalogueApplication>(*args)
