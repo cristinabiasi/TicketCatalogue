@@ -2,6 +2,7 @@ package it.group24.lab5.webapp2.ticketcatalogue.routers
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.netty.handler.codec.http.HttpMethod.GET
+import io.netty.handler.codec.http.HttpMethod.POST
 import it.group24.lab5.webapp2.ticketcatalogue.services.TicketHandlerImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
@@ -10,18 +11,18 @@ import org.springframework.http.MediaType
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
+import org.springframework.stereotype.Component
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.reactive.config.WebFluxConfigurer
-import org.springframework.web.reactive.function.server.RouterFunction
-import org.springframework.web.reactive.function.server.RouterFunctions
-import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.reactive.function.server.RequestPredicates.GET
-import org.springframework.web.reactive.function.server.RequestPredicates.accept
+import org.springframework.web.reactive.function.server.*
+import org.springframework.web.reactive.function.server.RequestPredicates.*
 import org.springframework.web.reactive.function.server.RouterFunctions.route
 import sun.plugin2.message.JavaScriptMemberOpMessage.GET
 
 
 @Configuration
-class TicketRouter: WebFluxConfigurer {
+@Component
+class TicketRouter(){
 
     /*@Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -34,8 +35,31 @@ class TicketRouter: WebFluxConfigurer {
     }*/
 
     @Bean
-    fun routes(ticketHandlerImpl: TicketHandlerImpl): RouterFunction<ServerResponse> {
-        return RouterFunctions
-            .route(GET("/tickets").and(accept(MediaType.APPLICATION_JSON)), ticketHandlerImpl::getAllTickets)
+    fun mainRouter(ticketHandlerImpl: TicketHandlerImpl) = router {
+
+        accept(MediaType.TEXT_HTML).nest {
+            GET("/tickets", ticketHandlerImpl::getAllTickets)
+        }
+        accept(MediaType.APPLICATION_JSON).nest{
+            POST("/shops/{ticket-id}") {
+                ticketHandlerImpl.getTicketByID(it.pathVariable("ticket-id").toLong(), it)
+            }
+        }
     }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

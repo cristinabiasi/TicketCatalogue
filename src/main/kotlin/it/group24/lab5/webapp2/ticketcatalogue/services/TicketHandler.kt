@@ -7,4 +7,6 @@ import reactor.core.publisher.Mono
 interface TicketHandler {
 
     fun getAllTickets(serverRequest: ServerRequest): Mono<ServerResponse>
+
+    fun getTicketByID(ticketID: Long, serverRequest: ServerRequest): Mono<ServerResponse>
 }

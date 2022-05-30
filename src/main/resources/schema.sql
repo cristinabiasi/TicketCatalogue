@@ -3,7 +3,8 @@ DROP TABLE IF EXISTS ticketCatalogue cascade;
 CREATE TABLE ticketCatalogue (
     id serial PRIMARY KEY,
     type VARCHAR ( 50 ) NOT NULL,
-    price NUMERIC NOT NULL
+    price NUMERIC NOT NULL,
+    age_restriction INT
 );
 
 DROP TABLE IF EXISTS orders;

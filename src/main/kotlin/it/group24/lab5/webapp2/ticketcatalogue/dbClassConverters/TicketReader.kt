@@ -15,7 +15,8 @@ class TicketReader: Converter<PostgresqlRow, Ticket> {
         return Ticket(
             source["id"] as Long,
             source["type"] as String,
-            source["price"] as Double
+            source["price"] as Double,
+            source["age_restriction"] as Int
         )
     }
 

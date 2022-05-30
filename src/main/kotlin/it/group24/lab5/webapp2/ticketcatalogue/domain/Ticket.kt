@@ -9,5 +9,6 @@ class Ticket(
     @Id
     val id: Long?,
     val type: String?,
-    val price: Double?
+    val price: Double?,
+    val age_restriction: Int?
 )
