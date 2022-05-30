@@ -8,6 +8,7 @@ import org.json.JSONObject
 import org.springframework.stereotype.Service
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity.ok
+import org.springframework.messaging.handler.annotation.Header
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyExtractor
 import org.springframework.web.reactive.function.BodyExtractors
@@ -32,28 +33,28 @@ class TicketHandlerImpl(
 
     override fun getTicketByID(ticketID: Long, serverRequest: ServerRequest): Mono<ServerResponse> {
 
-        serverRequest.bodyToMono(TicketPurchaseRequestDTO::class.java).flatMap {
+        return serverRequest.bodyToMono(TicketPurchaseRequestDTO::class.java).flatMap {
+
             WebClient
                 .create("http://localhost:8082")
                 .get()
                 .uri("/isAuthenticated")
+                .header("Authorization", serverRequest.headers().header("Authorization").firstOrNull())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Boolean::class.java)
                 .flatMap {
                     if (it){
                         //user is authenticated
-
+                        println("L'utente è autenticato")
+                        ServerResponse.status(200).body(BodyInserters.empty<Any>())
                     } else {
-                        //user is not auhtenticated
+                        //user is not authenticated
+                        println("L'utente non è autenticato")
                         ServerResponse.status(401).body(BodyInserters.empty<Any>())
                     }
                 }
         }
-
-
-            return ServerResponse.status(200).body(ticketRepository.findById(ticketID), Ticket::class.java)
-        }
-
     }
+
 }
