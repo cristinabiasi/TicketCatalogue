@@ -1,7 +1,7 @@
-package it.webappii.group24.paymentservice.KafkaConfig
+package it.group24.lab5.webapp2.ticketcatalogue.KafkaConfig
 
-import it.webappii.group24.paymentservice.customSerializer.PaymentDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -24,9 +24,11 @@ class KafkaConsumerConfig(
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
         props[ConsumerConfig.GROUP_ID_CONFIG] = "paymentRequest"
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = PaymentDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
-        return DefaultKafkaConsumerFactory(props)
+        return  DefaultKafkaConsumerFactory(props)
+
+
     }
 
     @Bean
@@ -37,4 +39,6 @@ class KafkaConsumerConfig(
         factory.containerProperties.isSyncCommits = true;
         return factory
     }
+
+
 }
