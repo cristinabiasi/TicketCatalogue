@@ -6,7 +6,7 @@ data class OrderDTO(
     var id: Long?,
     var status: String?,
     var ticketId: Long?,
-    var quantity: Int?,
+    var quantity: Long?,
     var userId: Long?
 )
 

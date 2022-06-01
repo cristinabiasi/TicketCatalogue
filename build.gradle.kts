@@ -31,6 +31,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.projectreactor:reactor-test")
     testImplementation("org.springframework.kafka:spring-kafka-test")
+    implementation("ch.qos.logback:logback-core:1.2.6")
 }
 
 tasks.withType<KotlinCompile> {

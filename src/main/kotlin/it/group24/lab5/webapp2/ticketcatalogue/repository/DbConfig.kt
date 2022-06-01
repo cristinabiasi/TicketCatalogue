@@ -18,6 +18,7 @@ import org.springframework.r2dbc.connection.R2dbcTransactionManager
 import org.springframework.r2dbc.connection.init.CompositeDatabasePopulator
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer
 import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator
+import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.transaction.ReactiveTransactionManager
 import org.springframework.transaction.annotation.EnableTransactionManagement
 

@@ -4,9 +4,9 @@ import org.springframework.data.annotation.Id
 
 class Order(
     @Id
-    val id: Long?,
+    val id: Long? = null,
     val status: String?,
     val ticketId: Long?,
-    val quantity: Int?,
+    val quantity: Long?,
     val userId: Long?
 )

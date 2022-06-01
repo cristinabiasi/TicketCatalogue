@@ -9,11 +9,13 @@ import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
 import javafx.application.Application.launch
 import org.json.JSONObject
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.stereotype.Service
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity.BodyBuilder
 import org.springframework.http.ResponseEntity.ok
+import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.messaging.handler.annotation.Header
 import org.springframework.r2dbc.core.DatabaseClient
 import org.springframework.stereotype.Component
@@ -38,7 +40,10 @@ import kotlin.math.abs
 class TicketHandlerImpl(
     private val ticketRepository: TicketRepository,
     private val orderRepository: OrderRepository,
-    private val template: R2dbcEntityTemplate
+    private val template: R2dbcEntityTemplate,
+    private val kafkaTemplate: KafkaTemplate<String, Any>,
+    @Value("\${kafka.topics.paymentReq}")
+    private val topic: String
 ): TicketHandler{
 
     override fun getAllTickets(serverRequest: ServerRequest): Mono<ServerResponse> {
@@ -56,11 +61,12 @@ class TicketHandlerImpl(
                     .header("Authorization", serverRequest.headers().header("Authorization").firstOrNull())
                     .accept(MediaType.APPLICATION_JSON)
                     .retrieve()
-                    .bodyToMono(Boolean::class.java)
+                    .bodyToMono(Long::class.java)
                     .flatMap {
-                        if (it) {
+                        userID ->
+                        if (userID > 0) {
                             //user is authenticated
-                            if (ticket.type.equals("weekend")){
+                            if (ticket.age_restriction != null){
                                 //i have to check age restriction
                                 WebClient
                                     .create("http://localhost:8082")
@@ -76,18 +82,19 @@ class TicketHandlerImpl(
                                     .flatMap { dateOfBirth ->
                                         val diff = abs(Date().time - dateOfBirth.time)
                                         val age = (TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)/365).toInt()
-                                        if (age < 27){
-                                            ServerResponse.status(403).body(Mono.just("You must be 27 years old to buy this type of ticket!"), String::class.java)
+                                        if (age < ticket.age_restriction){
+                                            //da rivedere
+                                            ServerResponse.status(403).body(Mono.just("You are not allowed to buy this type of ticket!"), String::class.java)
                                         }else{
-                                            //I am at least 27, I can buy the ticket
-                                            template.insert(Order(
+                                            orderRepository.save(Order(
                                                 status = "PENDING",
                                                 ticketId = ticket.id,
                                                 quantity = ticketPurchaseRequestDTO.quantity,
-                                                // I HAVE TO SAVE THE USERID CHECK LATER
+                                                userId = userID
                                             ))
+                                            println(ticketPurchaseRequestDTO.paymentInformationDTO)
                                             val billingInformation = PaymentRequestDTO(
-                                                paymentInformationDTO = ticketPurchaseRequestDTO.paymentInformation,
+                                                paymentInformationDTO = ticketPurchaseRequestDTO.paymentInformationDTO,
                                                 total = ticketPurchaseRequestDTO.quantity * ticket.price!!
                                             )
                                             // here I have to send the billing information to the
@@ -95,7 +102,7 @@ class TicketHandlerImpl(
 
                                                 //-------------//
 
-
+                                            kafkaTemplate.send(topic, billingInformation)
 
                                                 //-------------//
 
