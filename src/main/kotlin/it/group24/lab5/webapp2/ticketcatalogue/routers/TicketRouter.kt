@@ -17,7 +17,6 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.function.server.*
 import org.springframework.web.reactive.function.server.RequestPredicates.*
 import org.springframework.web.reactive.function.server.RouterFunctions.route
-import sun.plugin2.message.JavaScriptMemberOpMessage.GET
 
 
 @Configuration
@@ -40,6 +39,7 @@ class TicketRouter(){
         accept(MediaType.TEXT_HTML).nest {
             GET("/tickets", ticketHandlerImpl::getAllTickets)
         }
+
         accept(MediaType.APPLICATION_JSON).nest{
             POST("/shops/{ticket-id}") {
                 ticketHandlerImpl.getTicketByID(it.pathVariable("ticket-id").toLong(), it)

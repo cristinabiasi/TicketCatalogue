@@ -13,6 +13,6 @@ object Luhn {
 }
 
 private fun <T> Iterable<T>.mapEvenPositions(transform: (T) -> T): Iterable<T> =
-    mapIndexed({ index, value -> if (index.isOdd) transform(value) else value })
+    mapIndexed { index, value -> if (index.isOdd) transform(value) else value }
 
 private val Int.isOdd: Boolean get() = this.rem(2) == 1

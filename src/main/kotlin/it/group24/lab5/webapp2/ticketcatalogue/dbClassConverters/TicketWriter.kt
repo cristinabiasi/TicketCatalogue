@@ -14,7 +14,7 @@ class TicketWriter: Converter<Ticket, OutboundRow> {
     override fun convert(source: Ticket): OutboundRow? {
         return OutboundRow().apply {
             if (source.id != null)
-                put("id", Parameter.from(source.id))
+                put("id", Parameter.from(source.id!!))
             put("type", Parameter.from(source.type!!))
             put("price", Parameter.from(source.price!!))
             put("age_restriction", Parameter.from(source.age_restriction!!))

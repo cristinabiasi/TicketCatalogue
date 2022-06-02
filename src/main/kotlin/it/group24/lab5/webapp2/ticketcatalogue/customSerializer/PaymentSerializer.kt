@@ -13,7 +13,7 @@ class PaymentSerializer: Serializer<PaymentRequestDTO> {
     override fun serialize(topic: String?, data: PaymentRequestDTO?): ByteArray? {
         log.info("Serializing...")
         return objectMapper.writeValueAsBytes(
-            data ?: throw SerializationException("Error when serializing Product to ByteArray[]")
+            data ?: throw SerializationException("Error when serializing PaymentRequest to ByteArray[]")
         )
     }
 
