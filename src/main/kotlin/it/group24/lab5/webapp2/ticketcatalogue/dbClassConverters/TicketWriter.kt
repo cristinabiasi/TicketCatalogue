@@ -17,7 +17,8 @@ class TicketWriter: Converter<Ticket, OutboundRow> {
                 put("id", Parameter.from(source.id))
             put("type", Parameter.from(source.type!!))
             put("price", Parameter.from(source.price!!))
-            put("age_restriction", Parameter.from(source.age_restriction!!))
+            if (source.age_restriction != null)
+                put("age_restriction", Parameter.from(source.age_restriction!!))
         }
     }
 }

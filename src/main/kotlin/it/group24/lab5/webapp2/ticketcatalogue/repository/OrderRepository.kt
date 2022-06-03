@@ -10,12 +10,9 @@ import reactor.core.publisher.Mono
 
 interface OrderRepository: ReactiveCrudRepository<Order, Long> {
 
-    @Modifying
-    @Query("update orders set status = 'CONFIRMED' where id = ?1")
-    fun updateStatusById(id: Long)
 
     @Query("select * from orders where user_id = ?1")
-    fun findAllByUserId(userId: Long): Flux<Order>
+    fun findAllByUserId(user_id: Long): Flux<Order>
 
     @Query("select * from orders where order_id = ?1 and user_id = ?2")
     fun findOrderById(orderId: Long, userId: Long): Mono<Order>

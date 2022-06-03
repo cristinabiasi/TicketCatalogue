@@ -7,8 +7,8 @@ import org.springframework.data.relational.core.mapping.Table
 @Table("ticketCatalogue")
 data class Ticket(
     @Id
-    val id: Long?,
+    val id: Long? = null,
     val type: String?,
     val price: Double?,
-    val age_restriction: Int?
+    val age_restriction: Int? = null
 )

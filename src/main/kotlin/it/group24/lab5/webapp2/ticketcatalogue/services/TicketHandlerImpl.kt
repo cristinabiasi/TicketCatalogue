@@ -119,6 +119,10 @@ class TicketHandlerImpl(
                             return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId)
 
                         getUserAge(serverRequest).flatMap { dateOfBirth ->
+                            if(dateOfBirth == null)
+                                return@flatMap ServerResponse.status(400)
+                                    .bodyValue("You have to update the date of birth!")
+
                             if (!isAgeCompliant(dateOfBirth, ticket.age_restriction!!))
                                 return@flatMap ServerResponse.status(400)
                                     .bodyValue("You are not allowed to buy this type of ticket!")
@@ -132,20 +136,7 @@ class TicketHandlerImpl(
 
 
         }
-        override fun addTicket(serverRequest: ServerRequest): Mono<TicketDTO>? {
-            if (!isAdmin(serverRequest))
-                return null
-
-            return serverRequest.bodyToMono(TicketDTO::class.java).flatMap {
-                val newTicket = Ticket(null, it.type, it.price, it.age_restriction)
-
-                return@flatMap ticketRepository.save(newTicket).map { savedTicket ->
-                    savedTicket.toDTO()
-                }
-            }
-        }
-
-        private fun isAdmin(serverRequest: ServerRequest): Boolean{
+        override fun addTicket(serverRequest: ServerRequest): Mono<ServerResponse> {
             return WebClient
                 .create("http://localhost:8082")
                 .get()
@@ -157,8 +148,25 @@ class TicketHandlerImpl(
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Boolean::class.java)
-                .block()!!
-    }
+                .flatMap { isAdmin ->
+                    serverRequest.bodyToMono(TicketDTO::class.java).flatMap { ticketDTO ->
+                        if (isAdmin) {
+                            val newTicket = Ticket( type = ticketDTO.type,
+                                price = ticketDTO.price,
+                                age_restriction = ticketDTO.age_restriction
+                            )
+                            ticketRepository.save(newTicket).map { savedTicket ->
+                                savedTicket.toDTO()
+                            }.flatMap { ticketDTO ->
+                                ServerResponse.ok().bodyValue(ticketDTO)
+                            }
+                        } else {
+                            ServerResponse.status(401).bodyValue("You are not autorized")
+                        }
+                    }
+                }
+        }
+
 }
 
 

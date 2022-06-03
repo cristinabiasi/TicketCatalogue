@@ -11,5 +11,5 @@ interface TicketHandler {
 
     fun getTicketByID(serverRequest: ServerRequest): Mono<ServerResponse>
 
-    fun addTicket(serverRequest: ServerRequest): Mono<TicketDTO>?
+    fun addTicket(serverRequest: ServerRequest): Mono<ServerResponse>
 }

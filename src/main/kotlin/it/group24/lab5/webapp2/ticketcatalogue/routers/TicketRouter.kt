@@ -3,12 +3,15 @@ package it.group24.lab5.webapp2.ticketcatalogue.routers
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.netty.handler.codec.http.HttpMethod.GET
 import io.netty.handler.codec.http.HttpMethod.POST
+import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketDTO
 import it.group24.lab5.webapp2.ticketcatalogue.services.OrderHandlerImpl
 import it.group24.lab5.webapp2.ticketcatalogue.services.TicketHandlerImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.http.codec.ServerCodecConfigurer
 import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
@@ -18,6 +21,8 @@ import org.springframework.web.reactive.config.WebFluxConfigurer
 import org.springframework.web.reactive.function.server.*
 import org.springframework.web.reactive.function.server.RequestPredicates.*
 import org.springframework.web.reactive.function.server.RouterFunctions.route
+import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
 import sun.plugin2.message.JavaScriptMemberOpMessage.GET
 
 
@@ -67,11 +72,7 @@ class TicketRouter(){
         }
         accept(MediaType.APPLICATION_JSON).nest{
             POST("/admin/tickets") {
-                val savedTicketDTOMono = ticketHandlerImpl.addTicket(it)
-                if (savedTicketDTOMono == null)
-                    ServerResponse.status(403).bodyValue("You need to be admin!")
-                else
-                    ServerResponse.status(201).body(savedTicketDTOMono)
+                ticketHandlerImpl.addTicket(it)
             }
         }
     }

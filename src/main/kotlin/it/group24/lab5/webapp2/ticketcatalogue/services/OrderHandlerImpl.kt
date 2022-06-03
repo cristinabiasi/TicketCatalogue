@@ -4,16 +4,17 @@ import it.group24.lab5.webapp2.ticketcatalogue.domain.Order
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketRequestDTO
 import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
-import org.springframework.stereotype.Component
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
+import org.springframework.data.relational.core.query.Criteria
+import org.springframework.data.relational.core.query.Query
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.reactive.function.BodyInserter
+import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.bodyToMono
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 @Component
@@ -58,9 +59,11 @@ class OrderHandlerImpl(
             .bodyToMono(Long::class.java)
             .flatMap { userId ->
                 if(userId > 0) {
-                    orderRepository.findAllByUserId(userId).collectList().flatMap { ordersList ->
-                        ServerResponse.ok().body(BodyInserters.fromValue(ordersList))
-                    }
+                    val orders: Flux<Order> = template.select(Query.query(
+                        Criteria.from(
+                            Criteria.where("user_id").`is`(userId)
+                        )), Order::class.java)
+                        ServerResponse.ok().body(orders, Order::class.java)
                 }
                 else {
                      ServerResponse.status(HttpStatus.UNAUTHORIZED)
@@ -81,9 +84,12 @@ class OrderHandlerImpl(
             .bodyToMono(Long::class.java)
             .flatMap { userId ->
                 if(userId > 0) {
-                    orderRepository.findOrderById(order_id, userId).flatMap { order ->
-                        ServerResponse.ok().body(BodyInserters.fromValue(order))
-                    }
+                    val orders: Flux<Order> = template.select(Query.query(
+                        Criteria.from(
+                            Criteria.where("user_id").`is`(userId)
+                                .and("id").`is`(order_id)
+                        )), Order::class.java)
+                    ServerResponse.ok().body(orders, Order::class.java)
 
                 }
                 else {
@@ -131,11 +137,11 @@ class OrderHandlerImpl(
             .flatMap { isAdmin ->
                 if (isAdmin) {
                     // administrator
-                    ServerResponse.status(200)
-                        .body(
-                            orderRepository.findAllByUserId(userId),
-                            Order::class.java
-                        )
+                    val orders: Flux<Order> = template.select(Query.query(
+                        Criteria.from(
+                            Criteria.where("user_id").`is`(userId)
+                        )), Order::class.java)
+                    ServerResponse.ok().body(orders, Order::class.java)
                 } else {
                     ServerResponse.status(HttpStatus.UNAUTHORIZED)
                         .body(BodyInserters.fromValue("Unauthorized user!"))
