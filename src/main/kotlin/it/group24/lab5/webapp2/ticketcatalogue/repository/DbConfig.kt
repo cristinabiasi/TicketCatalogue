@@ -1,6 +1,8 @@
 package it.group24.lab5.webapp2.ticketcatalogue.repository
 
 import io.r2dbc.spi.ConnectionFactory
+import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.OrderReader
+import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.OrderWriter
 import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.TicketReader
 import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.TicketWriter
 import org.springframework.beans.factory.annotation.Value
@@ -62,7 +64,7 @@ class DbConfig(): AbstractR2dbcConfiguration(){
     }
 
     override fun getCustomConverters(): MutableList<Any> {
-        return mutableListOf(TicketReader(), TicketWriter())
+        return mutableListOf(TicketReader(), TicketWriter(), OrderWriter(), OrderReader())
     }
 
 }

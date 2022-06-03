@@ -12,9 +12,9 @@ DROP TABLE IF EXISTS orders;
 CREATE TABLE orders (
     id serial PRIMARY KEY,
     status VARCHAR ( 50 ) NOT NULL,
-    ticketId INT NOT NULL,
+    ticket_id INT NOT NULL,
     quantity INT NOT NULL,
-    userId INT NOT NULL,
-    FOREIGN KEY (ticketId)
+    user_id INT NOT NULL,
+    FOREIGN KEY (ticket_id)
         REFERENCES ticketCatalogue (id)
 );

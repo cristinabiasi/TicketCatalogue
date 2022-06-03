@@ -4,9 +4,11 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
 
-interface TicketHandler {
+interface OrderHandler {
 
-    fun getAllTickets(serverRequest: ServerRequest): Mono<ServerResponse>
+    fun changeOrderStatus(id: Long)
 
-    fun getTicketByID(serverRequest: ServerRequest): Mono<ServerResponse>
+    fun getAllOrders(serverRequest: ServerRequest): Mono<ServerResponse>
+
+    fun getOrderById(serverRequest: ServerRequest): Mono<ServerResponse>
 }

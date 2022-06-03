@@ -1,12 +1,14 @@
 package it.group24.lab5.webapp2.ticketcatalogue.domain
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Table
 
-class Order(
+@Table("orders")
+data class Order(
     @Id
     val id: Long? = null,
-    val status: String?,
-    val ticketId: Long?,
-    val quantity: Long?,
-    val userId: Long?
+    var status: String?,
+    val ticket_id: Long?,
+    val quantity: Int?,
+    val user_id: Long?
 )

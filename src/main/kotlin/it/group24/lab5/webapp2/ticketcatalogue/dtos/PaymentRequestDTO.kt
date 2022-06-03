@@ -6,5 +6,7 @@ data class PaymentRequestDTO(
     @JsonProperty("paymentInformationDTO")
     val paymentInformationDTO: PaymentInformationDTO,
     @JsonProperty("total")
-    val total: Double
+    val total: Double,
+    @JsonProperty("orderId")
+    val orderId: Long
 )

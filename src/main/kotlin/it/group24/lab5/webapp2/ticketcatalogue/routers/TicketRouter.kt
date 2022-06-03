@@ -41,8 +41,8 @@ class TicketRouter(){
             GET("/tickets", ticketHandlerImpl::getAllTickets)
         }
         accept(MediaType.APPLICATION_JSON).nest{
-            POST("/shops/{ticket-id}") {
-                ticketHandlerImpl.getTicketByID(it.pathVariable("ticket-id").toLong(), it)
+            POST("/shops") {
+                ticketHandlerImpl.getTicketByID(it)
             }
         }
     }

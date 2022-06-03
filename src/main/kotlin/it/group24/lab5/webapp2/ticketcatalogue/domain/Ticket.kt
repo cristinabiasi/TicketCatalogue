@@ -5,7 +5,7 @@ import org.springframework.data.relational.core.mapping.Table
 
 
 @Table("ticketCatalogue")
-class Ticket(
+data class Ticket(
     @Id
     val id: Long?,
     val type: String?,

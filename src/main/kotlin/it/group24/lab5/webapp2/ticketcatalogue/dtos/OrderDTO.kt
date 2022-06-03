@@ -6,14 +6,14 @@ data class OrderDTO(
     var id: Long?,
     var status: String?,
     var ticketId: Long?,
-    var quantity: Long?,
+    var quantity: Int?,
     var userId: Long?
 )
 
 fun Order.toDTO(): OrderDTO = OrderDTO(
     id,
     status,
-    ticketId,
+    ticket_id,
     quantity,
-    userId
+    user_id
 )

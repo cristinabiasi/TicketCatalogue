@@ -12,7 +12,6 @@ import org.springframework.kafka.core.ConsumerFactory
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory
 import org.springframework.kafka.listener.ContainerProperties
 
-@EnableKafka
 @Configuration
 class KafkaConsumerConfig(
     @Value("\${kafka.bootstrapAddress}")
