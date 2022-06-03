@@ -3,7 +3,9 @@ package it.group24.lab5.webapp2.ticketcatalogue.services
 import it.group24.lab5.webapp2.ticketcatalogue.domain.Order
 import it.group24.lab5.webapp2.ticketcatalogue.domain.Ticket
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.PaymentRequestDTO
+import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketDTO
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketPurchaseRequestDTO
+import it.group24.lab5.webapp2.ticketcatalogue.dtos.toDTO
 import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
 import org.springframework.beans.factory.annotation.Value
@@ -89,7 +91,8 @@ class TicketHandlerImpl(
             val billingInformation = PaymentRequestDTO(
                 paymentInformationDTO = ticketPurchaseRequestDTO.paymentInformationDTO,
                 total = ticketPurchaseRequestDTO.quantity * ticket.price!!,
-                orderId = it.id!!
+                orderId = it.id!!,
+                userId = userID!!
             )
 
             // here I have to send the billing information to the
@@ -111,50 +114,51 @@ class TicketHandlerImpl(
                 ticketRepository.findById(ticketPurchaseRequestDTO.ticketID).flatMap { ticket ->
                     if (userId < 0)
                         ServerResponse.status(401).bodyValue("User is NOT Authenticated")
-                    else
-                        ServerResponse.status(200).bodyValue("User is Authenticated")
-                    if (ticket.age_restriction == null)
-                        return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId)
+                    else {
+                        if (ticket.age_restriction == null)
+                            return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId)
 
-                    getUserAge(serverRequest).flatMap { dateOfBirth ->
-                        if(!isAgeCompliant(dateOfBirth, ticket.age_restriction!!))
-                            return@flatMap ServerResponse.status(400).bodyValue("You are not allowed to buy this type of ticket!")
+                        getUserAge(serverRequest).flatMap { dateOfBirth ->
+                            if (!isAgeCompliant(dateOfBirth, ticket.age_restriction!!))
+                                return@flatMap ServerResponse.status(400)
+                                    .bodyValue("You are not allowed to buy this type of ticket!")
 
-                        createOrder(ticket, ticketPurchaseRequestDTO, userId)
+                            createOrder(ticket, ticketPurchaseRequestDTO, userId)
+                        }
                     }
                 }
             }
         }
-        /*
-        val ticketPurchaseRequestDTOMono = serverRequest.bodyToMono(TicketPurchaseRequestDTO::class.java).log()
 
-        val userIdMono = getUserId(serverRequest).log()
-
-        val ticketMono = getTicketFromCatalogue(serverRequest).log()
-
-        // Serve per aspettare che finiscano tutti
-        return Mono.zip(userIdMono, ticketMono, ticketPurchaseRequestDTOMono).flatMap {
-            val userId = it.t1
-            val ticket = it.t2
-            val ticketPurchaseRequestDTO = it.t3
-
-            if (userId < 0)
-                ServerResponse.status(401).bodyValue("User is NOT Authenticated")
-            else
-                ServerResponse.status(200).bodyValue("User is NOT Authenticated")
-            if (ticket.age_restriction == null)
-                return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId)
-
-            getUserAge(serverRequest).flatMap { dateOfBirth ->
-                if(!isAgeCompliant(dateOfBirth, ticket.age_restriction!!))
-                    return@flatMap ServerResponse.status(400).bodyValue("You are not allowed to buy this type of ticket!")
-
-                createOrder(ticket, ticketPurchaseRequestDTO, userId)
-                }
-
-         */
 
         }
+        override fun addTicket(serverRequest: ServerRequest): Mono<TicketDTO>? {
+            if (!isAdmin(serverRequest))
+                return null
+
+            return serverRequest.bodyToMono(TicketDTO::class.java).flatMap {
+                val newTicket = Ticket(null, it.type, it.price, it.age_restriction)
+
+                return@flatMap ticketRepository.save(newTicket).map { savedTicket ->
+                    savedTicket.toDTO()
+                }
+            }
+        }
+
+        private fun isAdmin(serverRequest: ServerRequest): Boolean{
+            return WebClient
+                .create("http://localhost:8082")
+                .get()
+                .uri("/my/isAdmin")
+                .header(
+                    "Authorization",
+                    serverRequest.headers().header("Authorization").firstOrNull()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Boolean::class.java)
+                .block()!!
     }
+}
 
 

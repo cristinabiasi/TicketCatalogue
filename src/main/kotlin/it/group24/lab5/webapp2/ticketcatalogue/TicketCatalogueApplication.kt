@@ -31,7 +31,6 @@ class TicketCatalogueApplication(
         logger.info("Message received {}", request)
         if(request >= 0){
             orderHandler.changeOrderStatus(request)
-
         }
 
         ack.acknowledge()

@@ -8,5 +8,7 @@ data class PaymentRequestDTO(
     @JsonProperty("total")
     val total: Double,
     @JsonProperty("orderId")
-    val orderId: Long
+    val orderId: Long,
+    @JsonProperty("userID")
+    val userId: Long
 )
