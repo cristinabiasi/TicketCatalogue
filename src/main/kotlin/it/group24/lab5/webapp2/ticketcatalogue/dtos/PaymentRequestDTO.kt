@@ -1,6 +1,7 @@
 package it.group24.lab5.webapp2.ticketcatalogue.dtos
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.util.*
 
 data class PaymentRequestDTO(
     @JsonProperty("paymentInformationDTO")
@@ -10,5 +11,11 @@ data class PaymentRequestDTO(
     @JsonProperty("orderId")
     val orderId: Long,
     @JsonProperty("userID")
-    val userId: Long
+    val userId: Long,
+    @JsonProperty("type")
+    val type: String,
+    @JsonProperty("validFrom")
+    val validFrom: Date,
+    @JsonProperty("zones")
+    val zones: String
 )
