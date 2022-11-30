@@ -1,6 +1,7 @@
 package it.group24.lab5.webapp2.ticketcatalogue
 
 import it.group24.lab5.webapp2.ticketcatalogue.KafkaConfig.KafkaConfig
+import it.group24.lab5.webapp2.ticketcatalogue.dtos.PaymentResponseDTO
 import it.group24.lab5.webapp2.ticketcatalogue.services.OrderHandlerImpl
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.slf4j.LoggerFactory
@@ -26,10 +27,10 @@ class TicketCatalogueApplication(
 
 
     @KafkaListener(topics = ["\${kafka.topics.paymentAns}"], groupId = "paymentAnswer")
-    fun listenPaymentAnswer(consumerRecord: ConsumerRecord<Any, String>, ack: Acknowledgment) {
-        val request = consumerRecord.value().toLong()
+    fun listenPaymentAnswer(consumerRecord: ConsumerRecord<Any, PaymentResponseDTO>, ack: Acknowledgment) {
+        val request: PaymentResponseDTO = consumerRecord.value()
         logger.info("Message received {}", request)
-        if(request >= 0){
+        if(request.orderID >= 0){
             orderHandler.changeOrderStatus(request)
         }
 

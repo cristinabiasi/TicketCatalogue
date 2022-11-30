@@ -1,6 +1,7 @@
 package it.group24.lab5.webapp2.ticketcatalogue.services
 
 import it.group24.lab5.webapp2.ticketcatalogue.domain.Order
+import it.group24.lab5.webapp2.ticketcatalogue.dtos.PaymentResponseDTO
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketRequestDTO
 import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
@@ -24,22 +25,28 @@ class OrderHandlerImpl(
     private val template: R2dbcEntityTemplate
 ): OrderHandler {
 
-    override fun changeOrderStatus(id: Long) {
-        orderRepository.findById(id).subscribe {
+    override fun changeOrderStatus(paymentResponseDTO: PaymentResponseDTO) {
+        orderRepository.findById(paymentResponseDTO.orderID).subscribe {
             it.status = "CONFIRMED"
             orderRepository.save(it).subscribe()
-            addPurchasedTicket(it)
+            addPurchasedTicket(it, paymentResponseDTO)
 
         }
     }
 
-    private fun addPurchasedTicket(order: Order) {
+    private fun addPurchasedTicket(order: Order, paymentResponseDTO: PaymentResponseDTO) {
         WebClient
             .create("http://localhost:8082")
             .post()
             .uri("/api/tickets/${order.user_id}")
             .accept(MediaType.APPLICATION_JSON)
-            .body(BodyInserters.fromValue(TicketRequestDTO("buy_tickets", order.quantity, "abc")))
+            .body(BodyInserters.fromValue(TicketRequestDTO(
+                cmd = "buy_tickets",
+                type = paymentResponseDTO.type,
+                zones = paymentResponseDTO.zones,
+                quantity = order.quantity,
+                validFrom = paymentResponseDTO.validFrom
+            )))
             //.bodyValue(TicketRequestDTO("buy_tickets", order.quantity, "abc"))
             .retrieve()
             .bodyToFlux(Any::class.java)

@@ -92,7 +92,11 @@ class TicketHandlerImpl(
                 paymentInformationDTO = ticketPurchaseRequestDTO.paymentInformationDTO,
                 total = ticketPurchaseRequestDTO.quantity * ticket.price!!,
                 orderId = it.id!!,
-                userId = userID!!
+                userId = userID!!,
+                type = ticketPurchaseRequestDTO.type,
+                zones = ticketPurchaseRequestDTO.zones,
+                validFrom = ticketPurchaseRequestDTO.validFrom
+
             )
 
             // here I have to send the billing information to the

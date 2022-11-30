@@ -1,5 +1,6 @@
 package it.group24.lab5.webapp2.ticketcatalogue.KafkaConfig
 
+import it.group24.lab5.webapp2.ticketcatalogue.customSerializer.PaymentResponseDeserializer
 import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.consumer.KafkaConsumer
 import org.apache.kafka.common.serialization.StringDeserializer
@@ -23,7 +24,7 @@ class KafkaConsumerConfig(
         props[ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG] = servers
         props[ConsumerConfig.GROUP_ID_CONFIG] = "paymentRequest"
         props[ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
-        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = StringDeserializer::class.java
+        props[ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG] = PaymentResponseDeserializer::class.java
         props[ConsumerConfig.AUTO_OFFSET_RESET_CONFIG] = "earliest"
         return  DefaultKafkaConsumerFactory(props)
 
