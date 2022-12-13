@@ -1,6 +1,7 @@
 package it.group24.lab5.webapp2.ticketcatalogue.repository
 
 import io.r2dbc.spi.ConnectionFactory
+import io.r2dbc.spi.ConnectionFactoryOptions
 import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.OrderReader
 import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.OrderWriter
 import it.group24.lab5.webapp2.ticketcatalogue.dbClassConverters.TicketReader
@@ -35,8 +36,9 @@ class DbConfig(): AbstractR2dbcConfiguration(){
 
     @Bean
     override fun connectionFactory(): ConnectionFactory {
-        return ConnectionFactoryBuilder.withUrl(url)
-            .port(5432)
+        return ConnectionFactoryBuilder
+            .withUrl(url)
+            .port(54320)
             .username("postgres")
             .password("postgres")
             .build()

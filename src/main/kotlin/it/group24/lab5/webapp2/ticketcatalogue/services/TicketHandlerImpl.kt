@@ -28,9 +28,9 @@ import kotlin.math.abs
 class TicketHandlerImpl(
     private val ticketRepository: TicketRepository,
     private val orderRepository: OrderRepository,
-    private val template: R2dbcEntityTemplate,
+    //private val template: R2dbcEntityTemplate,
     private val kafkaTemplate: KafkaTemplate<String, Any>,
-    private val kafkaListenerContainerFactory: ConcurrentKafkaListenerContainerFactory<String, Any>,
+    //private val kafkaListenerContainerFactory: ConcurrentKafkaListenerContainerFactory<String, Any>,
     @Value("\${kafka.topics.paymentReq}")
     private val topic: String
 ): TicketHandler{
@@ -78,7 +78,8 @@ class TicketHandlerImpl(
     private fun createOrder(
         ticket: Ticket,
         ticketPurchaseRequestDTO: TicketPurchaseRequestDTO,
-        userID: Long?
+        userID: Long?,
+        authToken: String
     ): Mono<ServerResponse> {
         return orderRepository.save(
             Order(
@@ -95,15 +96,12 @@ class TicketHandlerImpl(
                 userId = userID!!,
                 type = ticketPurchaseRequestDTO.type,
                 zones = ticketPurchaseRequestDTO.zones,
-                validFrom = ticketPurchaseRequestDTO.validFrom
-
+                validFrom = ticketPurchaseRequestDTO.validFrom,
+                authToken = authToken
             )
-
             // here I have to send the billing information to the
             // payment service endpoint
-
             kafkaTemplate.send(topic, billingInformation)
-
             ServerResponse.status(200).body(BodyInserters.fromValue(it.id!!))
         }
     }
@@ -112,7 +110,7 @@ class TicketHandlerImpl(
         return ServerResponse.status(200).body(ticketRepository.findAll(), Ticket::class.java)
     }
 
-    override fun getTicketByID(serverRequest: ServerRequest): Mono<ServerResponse> {
+    override fun buyTicketByID(serverRequest: ServerRequest): Mono<ServerResponse> {
         return serverRequest.bodyToMono(TicketPurchaseRequestDTO::class.java).flatMap{ ticketPurchaseRequestDTO ->
             getUserId(serverRequest).flatMap { userId ->
                 ticketRepository.findById(ticketPurchaseRequestDTO.ticketID).flatMap { ticket ->
@@ -120,7 +118,7 @@ class TicketHandlerImpl(
                         ServerResponse.status(401).bodyValue("User is NOT Authenticated")
                     else {
                         if (ticket.age_restriction == null)
-                            return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId)
+                            return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId, serverRequest.headers().header("Authorization").elementAt(0))
 
                         getUserAge(serverRequest).flatMap { dateOfBirth ->
                             if(dateOfBirth == null)
@@ -131,7 +129,7 @@ class TicketHandlerImpl(
                                 return@flatMap ServerResponse.status(400)
                                     .bodyValue("You are not allowed to buy this type of ticket!")
 
-                            createOrder(ticket, ticketPurchaseRequestDTO, userId)
+                            createOrder(ticket, ticketPurchaseRequestDTO, userId, serverRequest.headers().header("Authorization").elementAt(0))
                         }
                     }
                 }
@@ -140,7 +138,8 @@ class TicketHandlerImpl(
 
 
         }
-        override fun addTicket(serverRequest: ServerRequest): Mono<ServerResponse> {
+
+    override fun addTicket(serverRequest: ServerRequest): Mono<ServerResponse> {
             return WebClient
                 .create("http://localhost:8082")
                 .get()

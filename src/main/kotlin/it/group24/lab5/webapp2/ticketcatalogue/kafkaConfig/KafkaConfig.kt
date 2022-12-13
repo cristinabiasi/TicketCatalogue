@@ -1,17 +1,16 @@
-package it.group24.lab5.webapp2.ticketcatalogue.KafkaConfig
+package it.group24.lab5.webapp2.ticketcatalogue.kafkaConfig
 
 import org.apache.kafka.clients.admin.AdminClientConfig
 import org.apache.kafka.clients.admin.NewTopic
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.kafka.annotation.EnableKafka
 import org.springframework.kafka.core.KafkaAdmin
 
 
 @Configuration
 class KafkaConfig(
-    @Value("\${kafka.bootstrapAddress}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val servers: String,
     @Value("\${kafka.topics.paymentReq}")
     private val topic: String

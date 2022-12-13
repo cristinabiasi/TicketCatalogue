@@ -17,5 +17,7 @@ data class PaymentRequestDTO(
     @JsonProperty("validFrom")
     val validFrom: Date,
     @JsonProperty("zones")
-    val zones: String
+    val zones: String,
+    @JsonProperty("authToken")
+    val authToken: String
 )

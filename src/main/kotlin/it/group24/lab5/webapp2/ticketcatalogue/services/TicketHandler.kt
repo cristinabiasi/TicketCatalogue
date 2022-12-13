@@ -9,7 +9,7 @@ interface TicketHandler {
 
     fun getAllTickets(serverRequest: ServerRequest): Mono<ServerResponse>
 
-    fun getTicketByID(serverRequest: ServerRequest): Mono<ServerResponse>
+    fun buyTicketByID(serverRequest: ServerRequest): Mono<ServerResponse>
 
     fun addTicket(serverRequest: ServerRequest): Mono<ServerResponse>
 }

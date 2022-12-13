@@ -1,6 +1,7 @@
-package it.group24.lab5.webapp2.ticketcatalogue.KafkaConfig
+package it.group24.lab5.webapp2.ticketcatalogue.kafkaConfig
 
 import it.group24.lab5.webapp2.ticketcatalogue.customSerializer.PaymentSerializer
+import org.apache.kafka.clients.consumer.ConsumerConfig
 import org.apache.kafka.clients.producer.ProducerConfig
 import org.apache.kafka.common.serialization.StringSerializer
 import org.springframework.beans.factory.annotation.Value
@@ -14,7 +15,7 @@ import org.springframework.kafka.core.ProducerFactory
 
 @Configuration
 class KafkaProducerConfig(
-    @Value("\${kafka.bootstrapAddress}")
+    @Value("\${spring.kafka.bootstrap-servers}")
     private val servers: String
 ) {
 

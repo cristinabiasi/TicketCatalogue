@@ -51,7 +51,7 @@ class TicketRouter(){
         }
         accept(MediaType.APPLICATION_JSON).nest{
             POST("/shops") {
-                ticketHandlerImpl.getTicketByID(it)
+                ticketHandlerImpl.buyTicketByID(it)
             }
         }
         accept(MediaType.TEXT_HTML).nest {
