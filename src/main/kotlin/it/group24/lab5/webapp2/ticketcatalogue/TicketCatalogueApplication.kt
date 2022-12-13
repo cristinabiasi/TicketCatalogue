@@ -16,8 +16,6 @@ import java.util.*
 @SpringBootApplication
 class TicketCatalogueApplication(
     private val kafkaTemplate: KafkaTemplate<String, Any>,
-    @Value("\${kafka.topics.paymentAns}")
-    private val topic2: String,
     val orderHandler: OrderHandlerImpl
 ){
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -27,14 +25,7 @@ class TicketCatalogueApplication(
     fun listenPaymentAnswer(consumerRecord: ConsumerRecord<Any, PaymentResponseDTO>, ack: Acknowledgment) {
         val request: PaymentResponseDTO = consumerRecord.value()
         logger.info("Message received {}", request)
-        if(request.orderID >= 0){
-            orderHandler.changeOrderStatus(request)
-        }
-        WebClient
-            .create("http://localhost:8082")
-            .get()
-            .uri("/my/dateOfBirth")
-
+        orderHandler.changeOrderStatus(request)
         ack.acknowledge()
     }
 }

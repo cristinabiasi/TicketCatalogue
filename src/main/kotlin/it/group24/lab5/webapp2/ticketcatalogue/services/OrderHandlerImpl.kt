@@ -1,10 +1,13 @@
 package it.group24.lab5.webapp2.ticketcatalogue.services
 
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.security.Keys
 import it.group24.lab5.webapp2.ticketcatalogue.domain.Order
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.PaymentResponseDTO
 import it.group24.lab5.webapp2.ticketcatalogue.dtos.TicketRequestDTO
 import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
 import org.springframework.data.relational.core.query.Criteria
 import org.springframework.data.relational.core.query.Query
@@ -17,6 +20,8 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import java.nio.charset.StandardCharsets
+import java.util.*
 
 @Component
 class OrderHandlerImpl(
@@ -25,27 +30,44 @@ class OrderHandlerImpl(
     private val template: R2dbcEntityTemplate
 ): OrderHandler {
 
-    override fun changeOrderStatus(paymentResponseDTO: PaymentResponseDTO) {
-        orderRepository.findById(paymentResponseDTO.orderID).subscribe {
-            it.status = "CONFIRMED"
-            orderRepository.save(it).subscribe()
-            addPurchasedTicket(it, paymentResponseDTO)
+    @Value("\${application.jwt.buyTicketKey}")
+    private val secretKey: String? = null
 
-        }
+    @Value("\${application.jwt.buyTicketClaim}")
+    private val claimName: String? = null
+
+    override fun changeOrderStatus(paymentResponseDTO: PaymentResponseDTO) {
+            orderRepository.findById(paymentResponseDTO.orderID).subscribe {
+                if (paymentResponseDTO.successful) {
+                    it.status = "CONFIRMED"
+                    orderRepository.save(it).subscribe()
+                    addPurchasedTicket(it, paymentResponseDTO)
+                }
+                else{
+                    it.status = "DENIED"
+                    orderRepository.save(it).subscribe()
+                }
+            }
     }
 
     private fun addPurchasedTicket(order: Order, paymentResponseDTO: PaymentResponseDTO) {
+        val authToValidate = Jwts.builder()
+            .claim(claimName, paymentResponseDTO.authToken)
+            .signWith(Keys.hmacShaKeyFor(secretKey!!.toByteArray(StandardCharsets.UTF_8)))
+            .compact()
+
         WebClient
             .create("http://localhost:8082")
             .post()
             .uri("/api/tickets/${order.user_id}")
             .accept(MediaType.APPLICATION_JSON)
+            .header("Authorization", "Bearer $authToValidate")
             .body(BodyInserters.fromValue(TicketRequestDTO(
-                cmd = "buy_tickets",
                 type = paymentResponseDTO.type,
                 zones = paymentResponseDTO.zones,
                 quantity = order.quantity,
-                validFrom = paymentResponseDTO.validFrom
+                validFrom = paymentResponseDTO.validFrom,
+                issuedAt = paymentResponseDTO.issuedAt
             )))
             //.bodyValue(TicketRequestDTO("buy_tickets", order.quantity, "abc"))
             .retrieve()

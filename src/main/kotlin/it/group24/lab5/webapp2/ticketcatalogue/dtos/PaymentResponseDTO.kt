@@ -12,6 +12,10 @@ data class PaymentResponseDTO(
     val zones: String,
     @JsonProperty("validFrom")
     val validFrom: Date,
+    @JsonProperty("issuedAt")
+    val issuedAt: Date,
     @JsonProperty("authToken")
-    val authToken: String
+    val authToken: String,
+    @JsonProperty("successful")
+    val successful: Boolean
 )

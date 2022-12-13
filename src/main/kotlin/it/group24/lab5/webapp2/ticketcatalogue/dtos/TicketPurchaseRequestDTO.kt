@@ -6,7 +6,6 @@ data class TicketPurchaseRequestDTO(
     val ticketID: Long,
     val quantity: Int,
     val paymentInformationDTO: PaymentInformationDTO,
-    val type: String,
     val validFrom: Date,
     val zones: String
 )

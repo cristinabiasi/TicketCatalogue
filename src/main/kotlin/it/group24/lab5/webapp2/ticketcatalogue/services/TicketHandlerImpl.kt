@@ -20,6 +20,8 @@ import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
 import reactor.core.publisher.Mono
+import java.sql.Timestamp
+import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -94,8 +96,9 @@ class TicketHandlerImpl(
                 total = ticketPurchaseRequestDTO.quantity * ticket.price!!,
                 orderId = it.id!!,
                 userId = userID!!,
-                type = ticketPurchaseRequestDTO.type,
+                type = ticket.type!!,
                 zones = ticketPurchaseRequestDTO.zones,
+                issuedAt = Date(),
                 validFrom = ticketPurchaseRequestDTO.validFrom,
                 authToken = authToken
             )
