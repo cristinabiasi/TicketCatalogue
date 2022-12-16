@@ -9,19 +9,15 @@ import it.group24.lab5.webapp2.ticketcatalogue.dtos.toDTO
 import it.group24.lab5.webapp2.ticketcatalogue.repository.OrderRepository
 import it.group24.lab5.webapp2.ticketcatalogue.repository.TicketRepository
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.data.r2dbc.core.R2dbcEntityTemplate
-import org.springframework.http.MediaType;
-import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory
+import org.springframework.http.MediaType
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.BodyInserters
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
-
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import org.springframework.web.reactive.function.server.ServerRequest
+import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Mono
-import java.sql.Timestamp
-import java.time.Instant
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -74,6 +70,10 @@ class TicketHandlerImpl(
             .accept(MediaType.APPLICATION_JSON)
             .retrieve()
             .bodyToMono(Long::class.java)
+            .onErrorResume(
+                WebClientResponseException::class.java
+            ) { ex ->
+                Mono.just(-1)  }
 
     }
 
@@ -105,7 +105,7 @@ class TicketHandlerImpl(
             // here I have to send the billing information to the
             // payment service endpoint
             kafkaTemplate.send(topic, billingInformation)
-            ServerResponse.status(200).body(BodyInserters.fromValue(it.id!!))
+            ServerResponse.status(200).body(BodyInserters.fromValue(it.id))
         }
     }
 
@@ -118,8 +118,9 @@ class TicketHandlerImpl(
             getUserId(serverRequest).flatMap { userId ->
                 ticketRepository.findById(ticketPurchaseRequestDTO.ticketID).flatMap { ticket ->
                     if (userId < 0)
-                        ServerResponse.status(401).bodyValue("User is NOT Authenticated")
+                        return@flatMap ServerResponse.status(401).bodyValue("User is NOT Authenticated")
                     else {
+
                         if (ticket.age_restriction == null)
                             return@flatMap createOrder(ticket, ticketPurchaseRequestDTO, userId, serverRequest.headers().header("Authorization").elementAt(0))
 
@@ -128,7 +129,7 @@ class TicketHandlerImpl(
                                 return@flatMap ServerResponse.status(400)
                                     .bodyValue("You have to update the date of birth!")
 
-                            if (!isAgeCompliant(dateOfBirth, ticket.age_restriction!!))
+                            if (!isAgeCompliant(dateOfBirth, ticket.age_restriction))
                                 return@flatMap ServerResponse.status(400)
                                     .bodyValue("You are not allowed to buy this type of ticket!")
 
